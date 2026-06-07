@@ -96,8 +96,8 @@ export default function Contact() {
                     <div>
                       <h5 className="text-white text-sm uppercase tracking-wider font-semibold">HQ Physical Lounge</h5>
                       <p className="text-zinc-500 text-xs font-light mt-1 leading-relaxed">
-                        808 Cybernetic Boulevard, Penthouse Suite D,<br />
-                        New York, NY 10018
+                        bava medical, GH opposite,<br />
+                        palavanchipalayam, tiruppur
                       </p>
                     </div>
                   </div>

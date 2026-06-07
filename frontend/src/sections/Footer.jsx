@@ -81,8 +81,8 @@ export default function Footer() {
           <div>
             <h4 className="text-white text-xs uppercase tracking-widest font-extrabold mb-4">// Direct Coords</h4>
             <p className="text-zinc-500 text-xs font-light leading-relaxed">
-              808 Cybernetic Boulevard,<br />
-              Penthouse Suite D, New York<br />
+              bava medical, GH opposite,<br />
+              palavanchipalayam, tiruppur<br />
               <span className="text-zinc-400 font-semibold mt-2 block">P: +1 (800) 700-GYM-ROLEX</span>
               <span className="text-zinc-400 font-semibold block">E: concierge@rolexgym.com</span>
             </p>
