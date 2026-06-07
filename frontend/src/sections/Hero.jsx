@@ -4,12 +4,20 @@
 // and glowing luxury action callouts.
 // ====================================================================
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Sparkles, Flame, ChevronDown } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
 import GymButton from '../components/GymButton';
+import Canvas3D from '../components/Canvas3D';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero() {
+  const heroContentRef = useRef(null);
+
   
   // 1. Framer Motion animation configs for parent and child entries
   const containerVariants = {
@@ -46,35 +54,30 @@ export default function Hero() {
     }
   };
 
-  return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gym-pitch bg-mesh-red px-6 py-20">
-      
-      {/* A. Cinematic background abstract mesh grid */}
-      <div className="absolute inset-0 opacity-40 mix-blend-screen pointer-events-none">
-        {/* Repeating wireframe grid lines */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:4rem_4rem]" />
-        
-        {/* Floating gradient light blobs */}
-        <motion.div 
-          animate={{
-            x: [0, 40, -30, 0],
-            y: [0, -50, 20, 0],
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-gym-neon rounded-full filter blur-[120px] opacity-25"
-        />
-        <motion.div 
-          animate={{
-            x: [0, -60, 30, 0],
-            y: [0, 40, -40, 0],
-          }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-red-600 rounded-full filter blur-[150px] opacity-20"
-        />
-      </div>
+  // 2. GSAP Scroll animation: fade and move content out when scrolling down
+  useGSAP(() => {
+    gsap.to(heroContentRef.current, {
+      y: 150,
+      opacity: 0,
+      scrollTrigger: {
+        trigger: "section.hero-section",
+        start: "top top",
+        end: "bottom top",
+        scrub: 1,
+      }
+    });
+  }, { scope: heroContentRef });
 
-      {/* B. Main Hero Container */}
-      <div className="relative z-10 max-w-5xl mx-auto text-center">
+  return (
+    <section className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden bg-gym-pitch px-6 py-20">
+      
+      {/* A. Cinematic 3D Canvas Background */}
+      <Canvas3D />
+
+      {/* B. Main Hero Content Container */}
+      <div ref={heroContentRef} className="relative z-10 max-w-5xl mx-auto text-center pointer-events-none">
+        {/* We use pointer-events-none on the container so the canvas behind gets mouse moves, 
+            but we re-enable pointer-events on the buttons */}
         
         <motion.div
           variants={containerVariants}
@@ -114,7 +117,7 @@ export default function Hero() {
           {/* Action buttons */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-col sm:flex-row items-center gap-4 mt-6 w-full sm:w-auto"
+            className="flex flex-col sm:flex-row items-center gap-4 mt-6 w-full sm:w-auto pointer-events-auto"
           >
             <GymButton 
               variant="primary" 
