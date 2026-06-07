@@ -28,7 +28,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn("⚠️ WARNING: SUPABASE_URL or SUPABASE_ANON_KEY is missing from environment variables!");
 }
 
-const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+const validUrl = (supabaseUrl && supabaseUrl.startsWith('http')) ? supabaseUrl : 'https://setup-your-supabase-url-in-render-settings.supabase.co';
+const supabase = createClient(validUrl, supabaseAnonKey || 'dummy-key');
 
 // ==========================================
 // REST API ENDPOINTS
