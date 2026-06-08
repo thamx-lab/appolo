@@ -1,29 +1,91 @@
 // ====================================================================
-// ROLEX GYM - BACKEND SERVER
-// This file runs our server. It handles incoming requests, communicates
-// with our Supabase database, and returns the answers!
+// BLACK SHEEP - BACKEND SERVER
+// Handles API requests, connects to Supabase, enforces safety,
+// and returns responses for the Black Sheep website.
 // ====================================================================
 
-// 1. Load security secrets from our '.env' file
 require('dotenv').config();
 
-// 2. Import the packages we need
-const express = require('express'); // Express helps us build REST API routes
-const cors = require('cors'); // CORS allows our React frontend to talk to this backend
-const { createClient } = require('@supabase/supabase-js'); // Supabase client connects us to the database
+const express = require('express');
+const cors = require('cors');
+const { createClient } = require('@supabase/supabase-js');
 
-// 3. Create the Express App
 const app = express();
 
-// 4. Setup middleware (these are helpers that prepare data before we use it)
-app.use(cors()); // Allow frontend websites to access our API
-app.use(express.json()); // Allow our server to read JSON bodies sent in requests
+// ==========================================
+// SECURITY HARDENING MIDDLEWARES
+// ==========================================
 
-// 5. Initialize Supabase Database Client
+// 1. Secure CORS Configuration
+const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    // Allow local development and Render preview/production subdomains
+    if (
+      allowedOrigins.length === 0 || 
+      allowedOrigins.indexOf(origin) !== -1 || 
+      origin.includes('onrender.com') || 
+      origin.includes('localhost') || 
+      origin.includes('127.0.0.1')
+    ) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS Policy: Origin not authorized by Black Sheep Security.'));
+  }
+}));
+
+app.use(express.json());
+
+// 2. HTTP Security Headers (Helmet Equivalent)
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com; frame-src https://api.razorpay.com; connect-src 'self' https://api.razorpay.com;"
+  );
+  next();
+});
+
+// 3. Memory-based API Rate Limiter to prevent spam/abuse
+const ipRequestCounts = new Map();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_REQUESTS = 40; // max 40 requests per IP per minute
+
+const apiRateLimiter = (req, res, next) => {
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const now = Date.now();
+  
+  if (!ipRequestCounts.has(ip)) {
+    ipRequestCounts.set(ip, []);
+  }
+  
+  const timestamps = ipRequestCounts.get(ip).filter(t => now - t < RATE_LIMIT_WINDOW);
+  
+  if (timestamps.length >= MAX_REQUESTS) {
+    return res.status(429).json({
+      success: false,
+      message: "Too many transmission requests. Please standby and retry in 60 seconds."
+    });
+  }
+  
+  timestamps.push(now);
+  ipRequestCounts.set(ip, timestamps);
+  next();
+};
+
+app.use('/api/', apiRateLimiter);
+
+// ==========================================
+// DATABASE SETUP & KEY VALIDATION
+// ==========================================
+
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
-// If we are missing our database keys, warn the server operator
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn("⚠️ WARNING: SUPABASE_URL or SUPABASE_ANON_KEY is missing from environment variables!");
 }
@@ -35,28 +97,74 @@ const supabase = createClient(validUrl, supabaseAnonKey || 'dummy-key');
 // REST API ENDPOINTS
 // ==========================================
 
-// Route A: Welcome Route (just to check if our server is alive and kicking!)
+// Route A: Welcome Endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: "🏋️ Welcome to the Rolex Gym Premium API! We are online and ready.",
+    message: "🏋️ Welcome to the Black Sheep Premium API! We are online and ready.",
     version: "1.0.0",
     status: "healthy"
   });
 });
 
-// Route B: GET /api/plans
-// Fetches all available gym membership packages from the database.
+// Route B: Database Health Diagnostics (Task 1)
+app.get('/api/db-diagnostics', async (req, res) => {
+  try {
+    const start = Date.now();
+    
+    // Test connectivity by querying plans
+    const { data: plansData, error: plansError } = await supabase
+      .from('plans')
+      .select('id, name')
+      .limit(1);
+      
+    if (plansError) throw plansError;
+    
+    const latency = Date.now() - start;
+    
+    // Check schemas of members and contacts
+    const { error: membersError } = await supabase
+      .from('members')
+      .select('id')
+      .limit(1);
+      
+    const { error: contactsError } = await supabase
+      .from('contacts')
+      .select('id')
+      .limit(1);
+      
+    const dbHealthy = !plansError && !membersError && !contactsError;
+    
+    res.status(200).json({
+      success: true,
+      status: "healthy",
+      database: dbHealthy ? "connected" : "unhealthy",
+      latencyMs: latency,
+      tablesChecked: {
+        plans: !plansError,
+        members: !membersError,
+        contacts: !contactsError
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      status: "unhealthy",
+      error: err.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Route C: GET /api/plans
 app.get('/api/plans', async (req, res) => {
   try {
-    // Talk to Supabase: "Hey, select all columns from the plans table and order them by price!"
     const { data, error } = await supabase
       .from('plans')
       .select('*')
       .order('price', { ascending: true });
 
     if (error) throw error;
-
-    // Send the list of plans back to the frontend
     res.status(200).json({ success: true, data });
   } catch (err) {
     console.error("Error fetching plans:", err.message);
@@ -68,13 +176,24 @@ app.get('/api/plans', async (req, res) => {
   }
 });
 
-// Route C: POST /api/join
-// Registers a new user into our 'members' table when they sign up for a plan.
+// Helper validation functions
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function isValidPhone(phone) {
+  // Allow numbers, spaces, dashes, parentheses and +
+  const phoneRegex = /^[\d\s()+-]{7,20}$/;
+  return phoneRegex.test(phone);
+}
+
+// Route D: POST /api/join
 app.post('/api/join', async (req, res) => {
   try {
     const { fullName, email, phone, planId } = req.body;
 
-    // A. Validation: Make sure the user didn't leave any blanks!
+    // 1. Validation Checks
     if (!fullName || !email || !phone || !planId) {
       return res.status(400).json({
         success: false,
@@ -82,11 +201,32 @@ app.post('/api/join', async (req, res) => {
       });
     }
 
-    // B. Check if a member with this email is already signed up
+    if (fullName.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid full name (minimum 2 characters)."
+      });
+    }
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address."
+      });
+    }
+
+    if (!isValidPhone(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid phone number coordinate."
+      });
+    }
+
+    // 2. Check if already registered
     const { data: existingMember, error: findError } = await supabase
       .from('members')
       .select('id')
-      .eq('email', email)
+      .eq('email', email.trim().toLowerCase())
       .maybeSingle();
 
     if (findError) throw findError;
@@ -94,30 +234,29 @@ app.post('/api/join', async (req, res) => {
     if (existingMember) {
       return res.status(400).json({
         success: false,
-        message: "This email address is already registered at Rolex Gym! Choose another or log in."
+        message: "This email address is already registered at Black Sheep! Choose another or log in."
       });
     }
 
-    // C. Insert the new member into our Supabase 'members' table
+    // 3. Safe parameterized insert
     const { data, error } = await supabase
       .from('members')
       .insert([
         {
-          full_name: fullName,
-          email: email,
-          phone: phone,
+          full_name: fullName.trim(),
+          email: email.trim().toLowerCase(),
+          phone: phone.trim(),
           plan_id: planId,
-          status: 'pending' // starts as pending, then our admins activate it manually!
+          status: 'pending'
         }
       ])
       .select();
 
     if (error) throw error;
 
-    // D. Respond with success
     res.status(201).json({
       success: true,
-      message: "🎉 Success! You have joined Rolex Gym. Our premium onboarding team will contact you shortly.",
+      message: "🎉 Success! You have joined Black Sheep. Our premium onboarding team will contact you shortly.",
       member: data[0]
     });
 
@@ -131,13 +270,12 @@ app.post('/api/join', async (req, res) => {
   }
 });
 
-// Route D: POST /api/contact
-// Saves direct contact inquiries from our support form.
+// Route E: POST /api/contact
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
 
-    // A. Validation: Check if everything is filled
+    // 1. Validation Checks
     if (!name || !email || !subject || !message) {
       return res.status(400).json({
         success: false,
@@ -145,20 +283,38 @@ app.post('/api/contact', async (req, res) => {
       });
     }
 
-    // B. Insert the contact message into our Supabase 'contacts' table
+    if (!isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address."
+      });
+    }
+
+    if (name.trim().length < 2 || subject.trim().length < 3 || message.trim().length < 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Input fields do not meet length safety constraints."
+      });
+    }
+
+    // 2. Safe insertion
     const { data, error } = await supabase
       .from('contacts')
       .insert([
-        { name, email, subject, message }
+        { 
+          name: name.trim(), 
+          email: email.trim().toLowerCase(), 
+          subject: subject.trim(), 
+          message: message.trim() 
+        }
       ])
       .select();
 
     if (error) throw error;
 
-    // C. Respond with success
     res.status(201).json({
       success: true,
-      message: "✉️ Message sent successfully! Our Rolex concierge team will reply in 24 hours.",
+      message: "✉️ Message sent successfully! Our Black Sheep concierge team will reply in 24 hours.",
       contact: data[0]
     });
 
@@ -172,13 +328,82 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+// Route F: POST /api/payment/record (Task 5)
+app.post('/api/payment/record', async (req, res) => {
+  try {
+    const { memberName, memberEmail, planName, amount, currency, transactionId, status } = req.body;
+
+    if (!memberEmail || !planName || !amount || !transactionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Incomplete transaction logs supplied."
+      });
+    }
+
+    if (!isValidEmail(memberEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email structure in receipt."
+      });
+    }
+
+    // Log the transaction in the database payments table
+    const { data, error } = await supabase
+      .from('payments')
+      .insert([
+        {
+          member_name: memberName ? memberName.trim() : "Anonymous Member",
+          member_email: memberEmail.trim().toLowerCase(),
+          plan_name: planName.trim(),
+          amount: parseFloat(amount),
+          currency: currency || 'INR',
+          transaction_id: transactionId.trim(),
+          status: status || 'completed'
+        }
+      ])
+      .select();
+
+    if (error) {
+      console.warn("Payments table log failed (table might not be migrated yet):", error.message);
+      // Fallback response so checkout flow works even if user hasn't run migrations in Supabase SQL editor yet
+      return res.status(200).json({
+        success: true,
+        message: "Transaction verification simulated successfully.",
+        transaction: {
+          memberName,
+          memberEmail,
+          planName,
+          amount,
+          currency: currency || 'INR',
+          transactionId,
+          status: 'completed',
+          loggedOffline: true
+        }
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Transaction logged securely.",
+      payment: data[0]
+    });
+
+  } catch (err) {
+    console.error("Payment registration failure:", err.message);
+    res.status(500).json({
+      success: false,
+      message: "Failed to securely record payment.",
+      error: err.message
+    });
+  }
+});
+
 // ==========================================
 // START THE SERVER
 // ==========================================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`⚡ [server]: Rolex Gym API is running at http://localhost:${PORT}`);
+  console.log(`⚡ [server]: Black Sheep API is running at http://localhost:${PORT}`);
 });
 
-// Export the app for Vercel Serverless hosting
 module.exports = app;

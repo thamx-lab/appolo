@@ -71,7 +71,7 @@ export default function About() {
             </h2>
 
             <p className="text-zinc-400 font-light text-base sm:text-lg leading-relaxed">
-              At Rolex Gym, we believe fitness is not just about effort; it is a meticulous blend of luxury comfort, scientific physiological optimization, and mental strength. We have engineered a premium sanctuary designed for those who demand ultimate luxury and high-performance training systems.
+              At Black Sheep, we believe fitness is not just about effort; it is a meticulous blend of luxury comfort, scientific physiological optimization, and mental strength. We have engineered a premium sanctuary designed for those who demand ultimate luxury and high-performance training systems.
             </p>
 
             {/* Core features listing */}

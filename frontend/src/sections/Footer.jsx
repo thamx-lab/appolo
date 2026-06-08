@@ -1,5 +1,5 @@
 // ====================================================================
-// ROLEX GYM - BRAND CONCIERGE FOOTER
+// BLACK SHEEP - BRAND CONCIERGE FOOTER
 // Renders the luxury brand logo, structured quick-links, direct coords,
 // and custom newsletter styling.
 // ====================================================================
@@ -36,7 +36,7 @@ export default function Footer() {
                 <Flame className="w-5 h-5 fill-white text-white" />
               </div>
               <span className="text-xl font-black uppercase tracking-widest">
-                ROLEX<span className="text-gym-neon">GYM</span>
+                BLACK<span className="text-gym-neon"> SHEEP</span>
               </span>
             </div>
             
@@ -81,10 +81,10 @@ export default function Footer() {
           <div>
             <h4 className="text-white text-xs uppercase tracking-widest font-extrabold mb-4">// Direct Coords</h4>
             <p className="text-zinc-500 text-xs font-light leading-relaxed">
-              bava medical, GH opposite,<br />
-              palavanchipalayam, tiruppur<br />
-              <span className="text-zinc-400 font-semibold mt-2 block">P: +1 (800) 700-GYM-ROLEX</span>
-              <span className="text-zinc-400 font-semibold block">E: concierge@rolexgym.com</span>
+              Bava Medical, GH Opposite,<br />
+              Palavanchipalayam, Tiruppur<br />
+              <span className="text-zinc-400 font-semibold mt-2 block">P: +91 9345812081</span>
+              <span className="text-zinc-400 font-semibold block">E: k26647300@gmail.com</span>
             </p>
           </div>
 
@@ -119,7 +119,7 @@ export default function Footer() {
         {/* Bottom footer text */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-zinc-600 text-[10px] font-semibold uppercase tracking-widest">
-            © {currentYear} ROLEX GYM SANCTUARY. ALL RIGHTS RESERVED.
+            © {currentYear} BLACK SHEEP FITNESS SANCTUARY. ALL RIGHTS RESERVED.
           </p>
           
           {/* Social icons */}

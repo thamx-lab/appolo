@@ -1,5 +1,5 @@
 -- ==========================================
--- ROLEX GYM - DATABASE SCHEMA
+-- BLACK SHEEP - DATABASE SCHEMA
 -- This file contains SQL instructions to setup tables in your Supabase PostgreSQL Database.
 -- Run this in the Supabase SQL Editor to configure your database tables.
 -- ==========================================
@@ -8,6 +8,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 2. Clean existing tables if they exist to avoid conflict
+DROP TABLE IF EXISTS payments;
 DROP TABLE IF EXISTS members;
 DROP TABLE IF EXISTS contacts;
 DROP TABLE IF EXISTS plans;
@@ -23,8 +24,7 @@ CREATE TABLE plans (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Add comments so people know what this is for
-COMMENT ON TABLE plans IS 'Stores premium subscription packages for Rolex Gym.';
+COMMENT ON TABLE plans IS 'Stores premium subscription packages for Black Sheep.';
 
 -- 4. MEMBERS TABLE (Stores users who signed up for gym memberships)
 CREATE TABLE members (
@@ -51,8 +51,23 @@ CREATE TABLE contacts (
 
 COMMENT ON TABLE contacts IS 'Support inquiries and contact forms filled by visitors.';
 
+-- 6. PAYMENTS TABLE (Stores secure transaction logs - Task 5)
+CREATE TABLE payments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    member_name VARCHAR(255) NOT NULL,
+    member_email VARCHAR(255) NOT NULL,
+    plan_name VARCHAR(255) NOT NULL,
+    amount NUMERIC(10, 2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'INR',
+    transaction_id VARCHAR(255) NOT NULL UNIQUE,
+    status VARCHAR(50) DEFAULT 'completed',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON TABLE payments IS 'Logs of payments processed for Black Sheep subscriptions.';
+
 -- ==========================================
--- SEED DATA - DEFAULT ROLEX GYM MEMBERSHIP PLANS
+-- SEED DATA - DEFAULT BLACK SHEEP MEMBERSHIP PLANS
 -- Run this script to populate your luxury membership tiers.
 -- ==========================================
 
@@ -62,8 +77,8 @@ INSERT INTO plans (name, price, duration, features, popular) VALUES
     49.00, 
     'month', 
     ARRAY[
-        'Access to elite gym floor', 
-        'Premium high-tech equipment', 
+        'Access to elite Black Sheep floor', 
+        'Premium high-tech bio-equipment', 
         'Locker room & organic spa access', 
         '1 complimentary trainer onboarding session'
     ], 
@@ -80,10 +95,10 @@ INSERT INTO plans (name, price, duration, features, popular) VALUES
         'Personal dedicated locker & gear cleaning',
         'Bi-weekly sessions with a master trainer'
     ], 
-    true -- This is marked as the popular plan!
+    true
 ),
 (
-    'Rolex Platinum VIP', 
+    'Black Sheep Platinum VIP', 
     249.00, 
     'month', 
     ARRAY[
