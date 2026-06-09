@@ -51,7 +51,7 @@ CREATE TABLE contacts (
 
 COMMENT ON TABLE contacts IS 'Support inquiries and contact forms filled by visitors.';
 
--- 6. PAYMENTS TABLE (Stores secure transaction logs - Task 5)
+-- 6. PAYMENTS TABLE (Stores secure Razorpay-verified transaction logs)
 CREATE TABLE payments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     member_name VARCHAR(255) NOT NULL,
@@ -59,7 +59,8 @@ CREATE TABLE payments (
     plan_name VARCHAR(255) NOT NULL,
     amount NUMERIC(10, 2) NOT NULL,
     currency VARCHAR(10) DEFAULT 'INR',
-    transaction_id VARCHAR(255) NOT NULL UNIQUE,
+    transaction_id VARCHAR(255) NOT NULL UNIQUE,  -- Razorpay payment_id
+    order_id VARCHAR(255),                         -- Razorpay order_id
     status VARCHAR(50) DEFAULT 'completed',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

@@ -130,7 +130,11 @@ export default function Plans() {
     setPaymentSuccessData(null);
   };
 
-  // 3. Initiate payment flow and backend logging
+  // 3. SECURE payment flow:
+  //    Step 1 → Server creates Razorpay Order (amount set server-side, tamper-proof)
+  //    Step 2 → Client opens Razorpay Checkout with server-provided order_id & key
+  //    Step 3 → After payment, server verifies HMAC-SHA256 signature
+  //    Step 4 → Only after verification, member is registered
   const handleCheckout = async (e) => {
     e.preventDefault();
     if (!formData.fullName || !formData.email || !formData.phone) {
@@ -141,106 +145,128 @@ export default function Plans() {
     setFormSubmitting(true);
     setFormFeedback({ type: '', message: '' });
 
-    const price = getPlanPrice(selectedPlan);
-    const payCurrency = currency;
-    const txId = 'TXN_' + Math.random().toString(36).substring(2, 12).toUpperCase();
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-    // If Razorpay SDK is loaded, open standard Razorpay
-    if (window.Razorpay) {
+    try {
+      // ── STEP 1: Create order on the SERVER ──────────────────────
+      // The amount is determined by the server based on plan name.
+      // This prevents users from tampering with the price in the browser.
+      const orderRes = await fetch(`${apiUrl}/api/payment/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planName: selectedPlan.name,
+          memberEmail: formData.email
+        })
+      });
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok || !orderData.success) {
+        throw new Error(orderData.message || 'Could not create payment order.');
+      }
+
+      // ── STEP 2: Open Razorpay Checkout ──────────────────────────
+      if (!window.Razorpay) {
+        throw new Error('Payment system is still loading. Please wait a moment and try again.');
+      }
+
       const options = {
-        key: "rzp_test_dummykey", // Test mode keys work automatically on client
-        amount: price * 100, // paise / subunits
-        currency: payCurrency === 'INR' ? 'INR' : 'USD',
-        name: "Black Sheep Sanctuary",
-        description: `Join: ${selectedPlan.name}`,
-        handler: async function (response) {
-          const razorpayPaymentId = response.razorpay_payment_id || txId;
-          await processMemberRegistration(razorpayPaymentId);
-        },
+        key: orderData.keyId,            // Public key from server (safe to use in browser)
+        amount: orderData.amount,         // Amount in paise, from server
+        currency: orderData.currency,     // INR, from server
+        order_id: orderData.orderId,      // Razorpay order ID from server
+        name: "Black Sheep Fitness",
+        description: `Membership: ${selectedPlan.name}`,
         prefill: {
           name: formData.fullName,
           email: formData.email,
           contact: formData.phone
         },
-        theme: {
-          color: "#ff2e2e" // Neon Red
+        theme: { color: "#ff2e2e" },
+        handler: async function (response) {
+          // ── STEP 3: Verify payment on the SERVER ────────────────
+          // Send the signature for HMAC-SHA256 verification.
+          // The server checks that Razorpay genuinely signed this payment.
+          try {
+            const verifyRes = await fetch(`${apiUrl}/api/payment/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id:   response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature:  response.razorpay_signature,
+                memberName:  formData.fullName,
+                memberEmail: formData.email,
+                planName:    selectedPlan.name,
+                amount:      orderData.amount
+              })
+            });
+            const verifyData = await verifyRes.json();
+
+            if (!verifyRes.ok || !verifyData.success) {
+              throw new Error(verifyData.message || 'Payment verification failed.');
+            }
+
+            // ── STEP 4: Register member ───────────────────────────
+            const registerRes = await fetch(`${apiUrl}/api/join`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                planId: selectedPlan.id
+              })
+            });
+            const registerData = await registerRes.json();
+
+            if (!registerRes.ok || !registerData.success) {
+              // Payment went through but registration failed — still show success
+              // since money was collected. The admin can register manually.
+              console.warn('Member registration note:', registerData.message);
+            }
+
+            setFormFeedback({
+              type: 'success',
+              message: '🎉 Payment verified! Welcome to Black Sheep.'
+            });
+
+            setPaymentSuccessData({
+              txnId: response.razorpay_payment_id,
+              amount: orderData.amount / 100, // convert paise to INR for display
+              currency: 'INR',
+              planName: selectedPlan.name,
+              timestamp: new Date().toLocaleString()
+            });
+
+            setFormData({ fullName: '', email: '', phone: '' });
+          } catch (verifyErr) {
+            console.error('Verification error:', verifyErr);
+            setFormFeedback({
+              type: 'error',
+              message: verifyErr.message || 'Payment verification failed. Contact support.'
+            });
+          } finally {
+            setFormSubmitting(false);
+          }
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setFormSubmitting(false);
-            setFormFeedback({ type: 'error', message: 'Payment cancelled by user.' });
+            setFormFeedback({ type: 'error', message: 'Payment cancelled.' });
           }
         }
       };
+
       const rzp = new window.Razorpay(options);
       rzp.open();
-    } else {
-      // Fallback: Trigger secure payment processor simulator
-      setTimeout(async () => {
-        await processMemberRegistration(txId);
-      }, 1500);
-    }
-  };
 
-  // 4. Finalize member sign-up & log transaction in DB
-  const processMemberRegistration = async (transactionId) => {
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      
-      // A. Register member in members table
-      const registerResponse = await fetch(`${apiUrl}/api/join`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          planId: selectedPlan.id
-        })
-      });
-      const registerResult = await registerResponse.json();
-
-      if (!registerResponse.ok || !registerResult.success) {
-        throw new Error(registerResult.message || "Failed to complete member registration.");
-      }
-
-      // B. Securely record transaction log in payments table
-      const recordResponse = await fetch(`${apiUrl}/api/payment/record`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          memberName: formData.fullName,
-          memberEmail: formData.email,
-          planName: selectedPlan.name,
-          amount: getPlanPrice(selectedPlan),
-          currency: currency,
-          transactionId: transactionId,
-          status: 'completed'
-        })
-      });
-      const recordResult = await recordResponse.json();
-
-      setFormFeedback({
-        type: 'success',
-        message: `🎉 Successfully signed up! Welcome to Black Sheep.`
-      });
-
-      setPaymentSuccessData({
-        txnId: transactionId,
-        amount: getPlanPrice(selectedPlan),
-        currency: currency,
-        planName: selectedPlan.name,
-        timestamp: new Date().toLocaleString()
-      });
-
-      setFormData({ fullName: '', email: '', phone: '' });
     } catch (err) {
-      console.error("Checkout process error:", err);
+      console.error('Checkout error:', err);
       setFormFeedback({
         type: 'error',
-        message: err.message || "Unable to complete secure payment validation. Please try again."
+        message: err.message || 'Unable to start payment. Please try again.'
       });
-    } finally {
       setFormSubmitting(false);
     }
   };

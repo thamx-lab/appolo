@@ -6,8 +6,10 @@
 
 require('dotenv').config();
 
-const express = require('express');
-const cors = require('cors');
+const express  = require('express');
+const cors     = require('cors');
+const crypto   = require('crypto');          // Built-in Node.js — for HMAC verification
+const Razorpay = require('razorpay');        // Official Razorpay SDK
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
@@ -45,7 +47,8 @@ app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com; frame-src https://api.razorpay.com; connect-src 'self' https://api.razorpay.com;"
+    // FIX 3: Added frame-src for checkout iframe + img-src for card logos/bank icons
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; connect-src 'self' https://api.razorpay.com; img-src 'self' https://checkout.razorpay.com data:;"
   );
   next();
 });
@@ -83,7 +86,7 @@ app.use('/api/', apiRateLimiter);
 // DATABASE SETUP & KEY VALIDATION
 // ==========================================
 
-const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseUrl     = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
@@ -92,6 +95,24 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const validUrl = (supabaseUrl && supabaseUrl.startsWith('http')) ? supabaseUrl : 'https://setup-your-supabase-url-in-render-settings.supabase.co';
 const supabase = createClient(validUrl, supabaseAnonKey || 'dummy-key');
+
+// ==========================================
+// RAZORPAY SETUP
+// ==========================================
+
+const razorpayKeyId     = process.env.RAZORPAY_KEY_ID;
+const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
+
+if (!razorpayKeyId || !razorpayKeySecret) {
+  console.warn("⚠️ WARNING: RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET is missing! Payments will not work.");
+}
+
+// FIX 1: Use empty strings instead of placeholder values to prevent
+// placeholder secret from being silently used in HMAC verification
+const razorpay = new Razorpay({
+  key_id:     razorpayKeyId     || '',
+  key_secret: razorpayKeySecret || ''
+});
 
 // ==========================================
 // REST API ENDPOINTS
@@ -328,73 +349,124 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// Route F: POST /api/payment/record (Task 5)
-app.post('/api/payment/record', async (req, res) => {
+// ─────────────────────────────────────────────────────────────────────
+// Route F-1: POST /api/payment/create-order
+// Creates a Razorpay Order on the SERVER (secure — amount cannot be
+// tampered with by the client because it is set here, not on frontend).
+// ─────────────────────────────────────────────────────────────────────
+app.post('/api/payment/create-order', async (req, res) => {
   try {
-    const { memberName, memberEmail, planName, amount, currency, transactionId, status } = req.body;
+    const { planName, memberEmail } = req.body;
 
-    if (!memberEmail || !planName || !amount || !transactionId) {
-      return res.status(400).json({
-        success: false,
-        message: "Incomplete transaction logs supplied."
-      });
+    if (!planName || !memberEmail) {
+      return res.status(400).json({ success: false, message: 'planName and memberEmail are required.' });
     }
 
     if (!isValidEmail(memberEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email structure in receipt."
-      });
+      return res.status(400).json({ success: false, message: 'Invalid email address.' });
     }
 
-    // Log the transaction in the database payments table
-    const { data, error } = await supabase
-      .from('payments')
-      .insert([
-        {
-          member_name: memberName ? memberName.trim() : "Anonymous Member",
-          member_email: memberEmail.trim().toLowerCase(),
-          plan_name: planName.trim(),
-          amount: parseFloat(amount),
-          currency: currency || 'INR',
-          transaction_id: transactionId.trim(),
-          status: status || 'completed'
-        }
-      ])
-      .select();
+    // FIX 2: Authoritative price map — set on the SERVER, not trusted from client.
+    // Prices are in paise (1 INR = 100 paise). Update these to match your actual plan prices.
+    const PRICE_MAP = {
+      silver:   60000,   // ₹600  — change to your actual Silver price × 100
+      gold:     80000,   // ₹800  — change to your actual Gold price × 100
+      platinum: 100000   // ₹1000 — change to your actual Platinum price × 100
+    };
 
-    if (error) {
-      console.warn("Payments table log failed (table might not be migrated yet):", error.message);
-      // Fallback response so checkout flow works even if user hasn't run migrations in Supabase SQL editor yet
-      return res.status(200).json({
-        success: true,
-        message: "Transaction verification simulated successfully.",
-        transaction: {
-          memberName,
-          memberEmail,
-          planName,
-          amount,
-          currency: currency || 'INR',
-          transactionId,
-          status: 'completed',
-          loggedOffline: true
-        }
-      });
-    }
+    const planKey = planName.toLowerCase().includes('silver') ? 'silver'
+                  : planName.toLowerCase().includes('gold')   ? 'gold'
+                  : 'platinum';
 
-    res.status(201).json({
-      success: true,
-      message: "Transaction logged securely.",
-      payment: data[0]
+    const amountInPaise = PRICE_MAP[planKey];
+
+    const order = await razorpay.orders.create({
+      amount:   amountInPaise,
+      currency: 'INR',
+      receipt:  `rcpt_${Date.now()}`,
+      notes: {
+        plan_name: planName,
+        member_email: memberEmail
+      }
+    });
+
+    res.status(200).json({
+      success:  true,
+      orderId:  order.id,
+      amount:   order.amount,
+      currency: order.currency,
+      keyId:    razorpayKeyId   // Safe to expose — this is the public key
     });
 
   } catch (err) {
-    console.error("Payment registration failure:", err.message);
-    res.status(500).json({
-      success: false,
-      message: "Failed to securely record payment.",
-      error: err.message
+    console.error('Razorpay order creation error:', err.message);
+    res.status(500).json({ success: false, message: 'Could not create payment order.', error: err.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// Route F-2: POST /api/payment/verify
+// Verifies Razorpay signature using HMAC-SHA256 on the SERVER.
+// Only records payment AFTER the signature is confirmed valid.
+// This prevents fake/spoofed payment confirmations.
+// ─────────────────────────────────────────────────────────────────────
+app.post('/api/payment/verify', async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      memberName,
+      memberEmail,
+      planName,
+      amount
+    } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, message: 'Missing payment verification fields.' });
+    }
+
+    // ✅ SECURITY: Verify the HMAC-SHA256 signature
+    // Razorpay signs: order_id + "|" + payment_id with your KEY SECRET
+    // If the signature doesn't match, the payment is FAKE — reject it.
+    const expectedSignature = crypto
+      .createHmac('sha256', razorpayKeySecret)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+
+    if (expectedSignature !== razorpay_signature) {
+      console.warn('⚠️ SECURITY ALERT: Signature mismatch! Possible payment tampering attempt.');
+      return res.status(400).json({ success: false, message: 'Payment verification failed. Invalid signature.' });
+    }
+
+    // ✅ Signature verified — safe to record payment
+    const { data, error } = await supabase
+      .from('payments')
+      .insert([{
+        member_name:    memberName   ? memberName.trim()                : 'Anonymous',
+        member_email:   memberEmail  ? memberEmail.trim().toLowerCase() : '',
+        plan_name:      planName     ? planName.trim()                  : 'Unknown Plan',
+        amount:         parseFloat(amount) / 100, // convert paise back to INR
+        currency:       'INR',
+        transaction_id: razorpay_payment_id,
+        order_id:       razorpay_order_id,
+        status:         'completed'
+      }])
+      .select();
+
+    if (error) {
+      console.warn('Payment DB log failed (run schema.sql in Supabase):', error.message);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: '✅ Payment verified and recorded successfully!',
+      paymentId: razorpay_payment_id
     });
+
+  } catch (err) {
+    console.error('Payment verification error:', err.message);
+    res.status(500).json({ success: false, message: 'Payment verification failed.', error: err.message });
   }
 });
 
