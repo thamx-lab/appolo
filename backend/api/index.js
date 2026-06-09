@@ -107,11 +107,12 @@ if (!razorpayKeyId || !razorpayKeySecret) {
   console.warn("⚠️ WARNING: RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET is missing! Payments will not work.");
 }
 
-// FIX 1: Use empty strings instead of placeholder values to prevent
-// placeholder secret from being silently used in HMAC verification
+// Use placeholder values to prevent the app from crashing on startup
+// if the environment variables are not set yet (e.g., local dev).
+// Payments will fail, but the server will run.
 const razorpay = new Razorpay({
-  key_id:     razorpayKeyId     || '',
-  key_secret: razorpayKeySecret || ''
+  key_id:     razorpayKeyId     || 'rzp_test_dummy_key_id_to_prevent_crash',
+  key_secret: razorpayKeySecret || 'dummy_secret'
 });
 
 // ==========================================
