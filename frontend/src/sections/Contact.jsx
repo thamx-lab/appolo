@@ -98,6 +98,15 @@ export default function Contact() {
                         bava medical, GH opposite,<br />
                         palavanchipalayam, tiruppur
                       </p>
+                      <a 
+                        href="https://www.google.com/maps/dir/?api=1&destination=Black+Sheep+Sanctuary,+Bava+Medical,+GH+Opposite,+Palavanchipalayam,+Tiruppur"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-gym-neon hover:text-red-400 text-[10px] font-bold uppercase tracking-widest mt-2 transition-colors duration-200 group"
+                      >
+                        Get Directions
+                        <span className="transform group-hover:translate-x-1 transition-transform duration-200">→</span>
+                      </a>
                     </div>
                   </div>
 

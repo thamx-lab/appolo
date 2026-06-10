@@ -80,10 +80,20 @@ export default function Footer() {
           {/* COLUMN 3: Concierge info */}
           <div>
             <h4 className="text-white text-xs uppercase tracking-widest font-extrabold mb-4">// Direct Coords</h4>
-            <p className="text-zinc-500 text-xs font-light leading-relaxed">
+            <a 
+              href="https://www.google.com/maps/dir/?api=1&destination=Black+Sheep+Sanctuary,+Bava+Medical,+GH+Opposite,+Palavanchipalayam,+Tiruppur"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-500 hover:text-zinc-400 text-xs font-light leading-relaxed block group transition-colors"
+            >
               Bava Medical, GH Opposite,<br />
               Palavanchipalayam, Tiruppur<br />
-              <span className="text-zinc-400 font-semibold mt-2 block">P: +91 9345812081</span>
+              <span className="text-gym-neon group-hover:text-red-400 text-[10px] font-bold uppercase tracking-widest mt-2 block transition-colors duration-200">
+                Open in Google Maps →
+              </span>
+            </a>
+            <p className="text-zinc-500 text-xs font-light leading-relaxed mt-2">
+              <span className="text-zinc-400 font-semibold block">P: +91 9345812081</span>
               <span className="text-zinc-400 font-semibold block">E: k26647300@gmail.com</span>
             </p>
           </div>
