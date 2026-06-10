@@ -81,7 +81,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white text-xs uppercase tracking-widest font-extrabold mb-4">// Direct Coords</h4>
             <a 
-              href="https://www.google.com/maps/dir/?api=1&destination=Black+Sheep+Sanctuary,+Bava+Medical,+GH+Opposite,+Palavanchipalayam,+Tiruppur"
+              href="https://maps.app.goo.gl/kXHAxro9ZYZ8x9Uv5"
               target="_blank"
               rel="noopener noreferrer"
               className="text-zinc-500 hover:text-zinc-400 text-xs font-light leading-relaxed block group transition-colors"

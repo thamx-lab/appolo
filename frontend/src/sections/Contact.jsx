@@ -89,7 +89,7 @@ export default function Contact() {
                   
                   {/* Address */}
                   <a 
-                    href="https://www.google.com/maps/dir/?api=1&destination=Black+Sheep+Sanctuary,+Bava+Medical,+GH+Opposite,+Palavanchipalayam,+Tiruppur"
+                    href="https://maps.app.goo.gl/kXHAxro9ZYZ8x9Uv5"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex gap-4 items-start p-4 -m-4 rounded-xl hover:bg-zinc-900/40 border border-transparent hover:border-zinc-800/60 transition-all duration-300 group cursor-pointer block"
