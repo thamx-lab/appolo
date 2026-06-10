@@ -88,8 +88,13 @@ export default function Contact() {
                 <div className="flex flex-col gap-6">
                   
                   {/* Address */}
-                  <div className="flex gap-4 items-start">
-                    <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800/80 text-gym-neon shadow-neon-red/5">
+                  <a 
+                    href="https://www.google.com/maps/dir/?api=1&destination=Black+Sheep+Sanctuary,+Bava+Medical,+GH+Opposite,+Palavanchipalayam,+Tiruppur"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex gap-4 items-start p-4 -m-4 rounded-xl hover:bg-zinc-900/40 border border-transparent hover:border-zinc-800/60 transition-all duration-300 group cursor-pointer block"
+                  >
+                    <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800/80 text-gym-neon shadow-neon-red/5 group-hover:bg-gym-neon group-hover:text-white transition-colors duration-300">
                       <MapPin className="w-5 h-5" />
                     </div>
                     <div>
@@ -98,17 +103,12 @@ export default function Contact() {
                         bava medical, GH opposite,<br />
                         palavanchipalayam, tiruppur
                       </p>
-                      <a 
-                        href="https://www.google.com/maps/dir/?api=1&destination=Black+Sheep+Sanctuary,+Bava+Medical,+GH+Opposite,+Palavanchipalayam,+Tiruppur"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-gym-neon hover:text-red-400 text-[10px] font-bold uppercase tracking-widest mt-2 transition-colors duration-200 group"
-                      >
+                      <span className="inline-flex items-center gap-1.5 text-gym-neon text-[10px] font-bold uppercase tracking-widest mt-2 transition-colors duration-200">
                         Get Directions
                         <span className="transform group-hover:translate-x-1 transition-transform duration-200">→</span>
-                      </a>
+                      </span>
                     </div>
-                  </div>
+                  </a>
 
                   {/* Phone */}
                   <div className="flex gap-4 items-start">
