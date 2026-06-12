@@ -5,6 +5,9 @@ import { Flame, Menu, X, LayoutDashboard } from 'lucide-react';
 // ✅ Lazy load ALL sections — each becomes its own chunk
 const Hero         = lazy(() => import('./sections/Hero'));
 const About        = lazy(() => import('./sections/About'));
+const Equipment    = lazy(() => import('./sections/Equipment'));
+const Schedule     = lazy(() => import('./sections/Schedule'));
+const Transformations = lazy(() => import('./sections/Transformations'));
 const Plans        = lazy(() => import('./sections/Plans'));
 const Trainers     = lazy(() => import('./sections/Trainers'));
 const BMICalculator= lazy(() => import('./sections/BMICalculator'));
@@ -98,10 +101,10 @@ export default function App() {
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
-            {['about','plans','trainers','bmi','contact'].map((id, i) => (
+            {['about','equipment','schedule','plans','bmi'].map((id, i) => (
               <button key={id} onClick={() => handleNavClick(id)}
                 className="text-zinc-400 hover:text-gym-neon text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer focus:outline-none">
-                {['Story','Tiers','Coaches','Metrics','Concierge'][i]}
+                {['Story','Tech','Classes','Tiers','Metrics'][i]}
               </button>
             ))}
           </nav>
@@ -138,7 +141,7 @@ export default function App() {
             className="fixed inset-0 top-[70px] z-30 bg-black/95 backdrop-blur-lg md:hidden p-6 border-t border-zinc-900"
           >
             <nav className="flex flex-col gap-6 items-center justify-center h-2/3">
-              {[['about','Our Story'],['plans','Membership Tiers'],['trainers','Master Coaches'],['bmi','Bio Assessor'],['contact','Concierge Desk']].map(([id, label]) => (
+              {[['about','Our Story'],['equipment','Tech Showcase'],['schedule','Timetable'],['plans','Membership Tiers'],['bmi','Bio Assessor']].map(([id, label]) => (
                 <button key={id} onClick={() => handleNavClick(id)}
                   className="text-zinc-400 hover:text-white text-base font-bold uppercase tracking-widest focus:outline-none">
                   {label}
@@ -163,6 +166,9 @@ export default function App() {
       <main>
         <Suspense fallback={<SectionFallback />}><Hero /></Suspense>
         <Suspense fallback={<SectionFallback />}><About /></Suspense>
+        <Suspense fallback={<SectionFallback />}><Equipment /></Suspense>
+        <Suspense fallback={<SectionFallback />}><Transformations /></Suspense>
+        <Suspense fallback={<SectionFallback />}><Schedule /></Suspense>
         <Suspense fallback={<SectionFallback />}><Plans /></Suspense>
         <Suspense fallback={<SectionFallback />}><Trainers /></Suspense>
         <Suspense fallback={<SectionFallback />}><BMICalculator /></Suspense>
