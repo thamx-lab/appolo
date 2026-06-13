@@ -90,6 +90,8 @@ export default function Equipment() {
             <img 
               src={equipmentData.image} 
               alt={equipmentData.title}
+              loading="lazy"
+              fetchpriority="low"
               className="w-full h-full object-cover opacity-60 mix-blend-luminosity hover:opacity-80 transition-opacity duration-700"
             />
             

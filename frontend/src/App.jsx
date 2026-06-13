@@ -1,6 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Flame, Menu, X, LayoutDashboard, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // ✅ Lazy load ALL sections — each becomes its own chunk
 const Hero         = lazy(() => import('./sections/Hero'));
@@ -15,6 +16,8 @@ const Testimonials = lazy(() => import('./sections/Testimonials'));
 const Contact      = lazy(() => import('./sections/Contact'));
 const Footer        = lazy(() => import('./sections/Footer'));
 const UserDashboard = lazy(() => import('./components/UserDashboard'));
+const AIChatWidget  = lazy(() => import('./components/AIChatWidget'));
+const FeedbackWidget= lazy(() => import('./components/FeedbackWidget'));
 
 // Simple dark fallback while a section loads
 const SectionFallback = () => (
@@ -22,10 +25,16 @@ const SectionFallback = () => (
 );
 
 export default function App() {
+  const { i18n } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
+
+  const toggleLanguage = () => {
+    const nextLang = i18n.language === 'en' ? 'es' : 'en';
+    i18n.changeLanguage(nextLang);
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2400);
@@ -111,6 +120,14 @@ export default function App() {
 
           <div className="hidden md:flex items-center gap-3">
             <button
+              onClick={toggleLanguage}
+              title="Change Language"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-transparent border border-zinc-700 hover:border-zinc-400 text-zinc-400 hover:text-white text-xs uppercase font-bold tracking-widest transition-all cursor-pointer"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              {i18n.language === 'es' ? 'ES' : 'EN'}
+            </button>
+            <button
               onClick={() => setDashboardOpen(true)}
               title="My Dashboard"
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-transparent border border-zinc-700 hover:border-purple-400 text-zinc-400 hover:text-purple-400 hover:bg-purple-500/10 text-xs uppercase font-bold tracking-widest transition-all cursor-pointer"
@@ -184,6 +201,12 @@ export default function App() {
           <UserDashboard onClose={() => setDashboardOpen(false)} />
         </Suspense>
       )}
+
+      {/* Floating Widgets */}
+      <Suspense fallback={null}>
+        <AIChatWidget />
+        <FeedbackWidget />
+      </Suspense>
 
     </div>
   );

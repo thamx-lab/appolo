@@ -4,6 +4,7 @@ import { Shield, Sparkles, Flame, ChevronDown } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { useTranslation } from 'react-i18next';
 import GymButton from '../components/GymButton';
 
 // ✅ Lazy load Canvas3D so Three.js only downloads when Hero is visible
@@ -12,6 +13,7 @@ const Canvas3D = lazy(() => import('../components/Canvas3D'));
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero() {
+  const { t } = useTranslation();
   const heroContentRef = useRef(null);
 
   const containerVariants = {
@@ -77,25 +79,25 @@ export default function Hero() {
             className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-red-500/25 bg-zinc-950/65 backdrop-blur text-gym-neon text-xs font-semibold uppercase tracking-widest cursor-default select-none shadow-neon-red/10"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>The New Era of High-Performance Luxury</span>
+            <span>{t('hero.badge')}</span>
           </motion.div>
 
           <motion.h1
             variants={itemVariants}
             className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tight text-white leading-none uppercase"
           >
-            FORGE YOUR <br />
+            {t('hero.title1')} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-gym-neon neon-text-glow">
-              ULTIMATE
+              {t('hero.title_gradient')}
             </span>{" "}
-            PHYSIQUE
+            {t('hero.title2')}
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
             className="max-w-2xl text-zinc-400 text-base sm:text-lg md:text-xl font-light leading-relaxed mt-2"
           >
-            Step into the future of luxury athletic performance. High-performance bio-monitoring, custom physiological coaching, and world-class recovery chambers.
+            {t('hero.subtitle')}
           </motion.p>
 
           <motion.div
@@ -108,7 +110,7 @@ export default function Hero() {
               onClick={handleScrollToPlans}
             >
               <Flame className="w-4 h-4" />
-              Join Black Sheep Elite
+              {t('hero.btn_primary')}
             </GymButton>
             
             <GymButton 
@@ -117,7 +119,7 @@ export default function Hero() {
               onClick={handleScrollToAbout}
             >
               <Shield className="w-4 h-4" />
-              Discover Story
+              {t('hero.btn_secondary')}
             </GymButton>
           </motion.div>
         </motion.div>
@@ -130,7 +132,7 @@ export default function Hero() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer z-10 select-none text-zinc-500 hover:text-gym-neon transition-colors"
         onClick={handleScrollToAbout}
       >
-        <span className="text-xs uppercase tracking-widest font-semibold">Scroll Down</span>
+        <span className="text-xs uppercase tracking-widest font-semibold">{t('hero.scroll')}</span>
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}

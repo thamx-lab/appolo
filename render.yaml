@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: black-sheep-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    pullRequestPreviewsEnabled: true
+    repo: https://github.com/thamx-lab/appolo # Automatically uses the connected repo
+    branch: main
+    autoDeploy: true
