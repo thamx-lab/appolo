@@ -22,6 +22,12 @@
   body {
     background-color: #09090b;
     overflow-x: hidden;
+    cursor: none; /* Custom magnetic cursor takes over on desktop */
+  }
+
+  /* Restore default cursor on touch devices */
+  @media (hover: none) {
+    body { cursor: auto; }
   }
 
   /* Premium scrollbar to avoid cheap default browser bars */

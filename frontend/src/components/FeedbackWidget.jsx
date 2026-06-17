@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThumbsUp, ThumbsDown, Check } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 export default function FeedbackWidget() {
   const [submitted, setSubmitted] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
 
   const handleFeedback = (type) => {
-    // In a real app, send 'type' to backend/analytics here
+    if (type === 'up') {
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { x: 0.05, y: 0.9 },
+        colors: ['#ff2e2e', '#ffffff', '#ff6b6b', '#ff0000'],
+        ticks: 200
+      });
+    }
     setSubmitted(true);
     setTimeout(() => {
       setIsOpen(false);

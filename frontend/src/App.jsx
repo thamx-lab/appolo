@@ -18,6 +18,10 @@ const Footer        = lazy(() => import('./sections/Footer'));
 const UserDashboard = lazy(() => import('./components/UserDashboard'));
 const AIChatWidget  = lazy(() => import('./components/AIChatWidget'));
 const FeedbackWidget= lazy(() => import('./components/FeedbackWidget'));
+const MagneticCursor    = lazy(() => import('./components/MagneticCursor'));
+const AmbientSound      = lazy(() => import('./components/AmbientSound'));
+const ParticleBackground= lazy(() => import('./components/ParticleBackground'));
+const VoiceNav          = lazy(() => import('./components/VoiceNav'));
 
 // Simple dark fallback while a section loads
 const SectionFallback = () => (
@@ -119,6 +123,12 @@ export default function App() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
+            <Suspense fallback={null}>
+              <VoiceNav />
+            </Suspense>
+            <Suspense fallback={null}>
+              <AmbientSound />
+            </Suspense>
             <button
               onClick={toggleLanguage}
               title="Change Language"
@@ -204,6 +214,8 @@ export default function App() {
 
       {/* Floating Widgets */}
       <Suspense fallback={null}>
+        <ParticleBackground />
+        <MagneticCursor />
         <AIChatWidget />
         <FeedbackWidget />
       </Suspense>
