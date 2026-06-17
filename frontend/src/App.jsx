@@ -36,7 +36,7 @@ export default function App() {
   const [dashboardOpen, setDashboardOpen] = useState(false);
 
   const toggleLanguage = () => {
-    const nextLang = i18n.language === 'en' ? 'es' : 'en';
+    const nextLang = i18n.language === 'en' ? 'ta' : 'en';
     i18n.changeLanguage(nextLang);
   };
 
@@ -135,7 +135,7 @@ export default function App() {
               className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-transparent border border-zinc-700 hover:border-zinc-400 text-zinc-400 hover:text-white text-xs uppercase font-bold tracking-widest transition-all cursor-pointer"
             >
               <Globe className="w-3.5 h-3.5" />
-              {i18n.language === 'es' ? 'ES' : 'EN'}
+              {i18n.language === 'ta' ? 'TA' : 'EN'}
             </button>
             <button
               onClick={() => setDashboardOpen(true)}

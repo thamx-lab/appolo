@@ -17,17 +17,17 @@ const resources = {
       }
     }
   },
-  es: {
+  ta: {
     translation: {
       hero: {
-        badge: "La Nueva Era del Lujo de Alto Rendimiento",
-        title1: "FORJA TU",
-        title_gradient: "FÍSICO",
-        title2: "DEFINITIVO",
-        subtitle: "Adéntrate en el futuro del rendimiento atlético de lujo. Biomonitoreo de alto rendimiento, entrenamiento fisiológico personalizado y cámaras de recuperación de clase mundial.",
-        btn_primary: "Únete a la Élite Black Sheep",
-        btn_secondary: "Descubre la Historia",
-        scroll: "Desplázate"
+        badge: "உயர்தர சொகுசின் புதிய யுகம்",
+        title1: "உங்கள்",
+        title_gradient: "உடலை",
+        title2: "வடிவமைக்கவும்",
+        subtitle: "சொகுசு விளையாட்டு செயல்திறனின் எதிர்காலத்தில் அடியெடுத்து வையுங்கள். உயர்தர உயிர் கண்காணிப்பு, தனிப்பயன் பயிற்சி மற்றும் உலர்தர மீட்பு அறைகள்.",
+        btn_primary: "பிளாக் ஷீப் எலைட்டில் சேரவும்",
+        btn_secondary: "கதையை கண்டறியவும்",
+        scroll: "கீழே உருட்டவும்"
       }
     }
   }
@@ -40,7 +40,7 @@ i18n
     resources,
     fallbackLng: 'en',
     interpolation: {
-      escapeValue: false // react already safes from xss
+      escapeValue: false
     }
   });
 
