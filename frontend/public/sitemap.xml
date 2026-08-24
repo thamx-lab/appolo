@@ -3,7 +3,7 @@
 
   <!-- Main homepage -->
   <url>
-    <loc>https://blacksheepsanctuary.com/</loc>
+    <loc>https://black-sheep-frontend.onrender.com/</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
@@ -11,42 +11,42 @@
 
   <!-- Sections (anchors on the same page — still helps Google understand content) -->
   <url>
-    <loc>https://blacksheepsanctuary.com/#about</loc>
+    <loc>https://black-sheep-frontend.onrender.com/#about</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://blacksheepsanctuary.com/#equipment</loc>
+    <loc>https://black-sheep-frontend.onrender.com/#equipment</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://blacksheepsanctuary.com/#schedule</loc>
+    <loc>https://black-sheep-frontend.onrender.com/#schedule</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://blacksheepsanctuary.com/#plans</loc>
+    <loc>https://black-sheep-frontend.onrender.com/#plans</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://blacksheepsanctuary.com/#trainers</loc>
+    <loc>https://black-sheep-frontend.onrender.com/#trainers</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://blacksheepsanctuary.com/#bmi</loc>
+    <loc>https://black-sheep-frontend.onrender.com/#bmi</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

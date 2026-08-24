@@ -6,4 +6,4 @@ User-agent: *
 Allow: /
 
 # Sitemap location — helps Google find all your pages faster
-Sitemap: https://blacksheepsanctuary.com/sitemap.xml
+Sitemap: https://black-sheep-frontend.onrender.com/sitemap.xml
