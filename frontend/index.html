@@ -2,25 +2,86 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- High-end favicon icon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏋️</text></svg>" />
+
+    <!-- ✅ Favicon — uses the real SVG in /public -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- ✅ Viewport & basic -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- SEO Optimization Meta Tags -->
-    <title>Black Sheep | Premium Futuristic Luxury Fitness Sanctuary</title>
-    <meta name="description" content="Welcome to Black Sheep Sanctuary: The ultimate elite biomechanical training sanctuary. Discover luxury strength facilities, cryo recovery lounges, custom physical meal designs, and certified master coaches." />
-    <meta name="keywords" content="luxury gym, premium fitness, black sheep, strength lab, elite coaching, physical training, biomarker tracking, cryotherapy recovery, new york luxury fitness" />
-    
-    <!-- Social Share Cards metadata (Open Graph) -->
-    <meta property="og:title" content="Black Sheep | Premium Futuristic Luxury Fitness Sanctuary" />
-    <meta property="og:description" content="Forging ultimate physiques in a high-tech biometric luxury athletic laboratory. Master coaches, cryotherapy, custom organic meal delivery." />
+    <meta name="theme-color" content="#ff2e2e" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- ✅ Canonical URL — tells Google the "official" address of your page -->
+    <link rel="canonical" href="https://blacksheepsanctuary.com/" />
+
+    <!-- ✅ Primary SEO Meta Tags -->
+    <title>Black Sheep Sanctuary | Premium Luxury Fitness &amp; Strength Lab</title>
+    <meta name="description" content="Black Sheep Sanctuary — Chennai's elite biomechanical training gym. Luxury strength labs, cryo recovery, custom meal plans, and master coaches. Join today." />
+    <meta name="keywords" content="luxury gym, premium fitness, black sheep sanctuary, strength lab, elite coaching, personal training, cryotherapy, gym chennai, fitness sanctuary" />
+    <meta name="author" content="Black Sheep Sanctuary" />
+
+    <!-- ✅ Open Graph — controls how your link looks when shared on WhatsApp, Facebook, etc. -->
     <meta property="og:type" content="website" />
-    
-    <!-- Preconnect speed loading triggers for Google Fonts -->
+    <meta property="og:url" content="https://blacksheepsanctuary.com/" />
+    <meta property="og:site_name" content="Black Sheep Sanctuary" />
+    <meta property="og:title" content="Black Sheep Sanctuary | Premium Luxury Fitness &amp; Strength Lab" />
+    <meta property="og:description" content="Forging ultimate physiques in a high-tech biometric luxury athletic lab. Master coaches, cryotherapy, and custom organic meal delivery." />
+    <meta property="og:image" content="https://blacksheepsanctuary.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- ✅ Twitter Card — controls how your link looks on Twitter/X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://blacksheepsanctuary.com/" />
+    <meta name="twitter:title" content="Black Sheep Sanctuary | Premium Luxury Fitness" />
+    <meta name="twitter:description" content="Elite biomechanical training. Cryo recovery. Master coaches. Chennai's most exclusive gym." />
+    <meta name="twitter:image" content="https://blacksheepsanctuary.com/og-image.jpg" />
+
+    <!-- ✅ JSON-LD Structured Data — makes Google show rich results (address, hours, phone) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HealthClub",
+      "name": "Black Sheep Sanctuary",
+      "description": "Chennai's elite biomechanical training gym — luxury strength labs, cryo recovery, custom meal plans, and master coaches.",
+      "url": "https://blacksheepsanctuary.com",
+      "logo": "https://blacksheepsanctuary.com/favicon.svg",
+      "image": "https://blacksheepsanctuary.com/og-image.jpg",
+      "telephone": "+91-9345812081",
+      "email": "k26647300@gmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Black Sheep Sanctuary",
+        "addressLocality": "Chennai",
+        "addressRegion": "Tamil Nadu",
+        "addressCountry": "IN"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+          "opens": "05:00",
+          "closes": "23:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Saturday","Sunday"],
+          "opens": "06:00",
+          "closes": "22:00"
+        }
+      ],
+      "priceRange": "₹₹",
+      "sameAs": []
+    }
+    </script>
+
+    <!-- ✅ Preconnect — speeds up Google Fonts loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Privacy-First Analytics (Plausible/Umami placeholder) -->
+    <!-- ✅ Analytics (Plausible — privacy-first, no cookie popup needed) -->
     <script defer data-domain="blacksheepsanctuary.com" src="https://plausible.io/js/script.js"></script>
   </head>
   <body class="bg-zinc-950 text-zinc-100 antialiased">

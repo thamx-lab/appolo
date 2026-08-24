@@ -1,0 +1,9 @@
+# Black Sheep Sanctuary — robots.txt
+# Tells search engine crawlers which pages they can index
+
+# Allow all crawlers to index everything
+User-agent: *
+Allow: /
+
+# Sitemap location — helps Google find all your pages faster
+Sitemap: https://blacksheepsanctuary.com/sitemap.xml
